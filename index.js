@@ -9,8 +9,8 @@ app.use(cors());
 
 // Routes
 app.get("/", (req, res) => {
-    // db.query("select");
-    res.sendFile(__dirname + "/index.html");
+    // db.query("select * from ");
+    res.sendFile(__dirname + "/client/index.html");
 });
 
 app.get("/greet", (req, res) => {
