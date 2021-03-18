@@ -1,7 +1,7 @@
 {
   "name": "fourspace",
   "version": "1.0.0",
-  "description": "Dbms project",
+  "description": "dbms project",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,10 +10,13 @@
     "type": "git",
     "url": "git+https://github.com/GunjanRajTiwari/FourSpace.git"
   },
-  "author": "Gunjan",
+  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/GunjanRajTiwari/FourSpace/issues"
   },
-  "homepage": "https://github.com/GunjanRajTiwari/FourSpace#readme"
+  "homepage": "https://github.com/GunjanRajTiwari/FourSpace#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
