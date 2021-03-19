@@ -5,7 +5,7 @@ if (process.env.NODE_ENV !== "procuction") {
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-const session = require("express-session");
+const jwt = require("jsonwebtoken");
 
 const db = require("./db");
 
@@ -13,13 +13,6 @@ const db = require("./db");
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-    })
-);
 
 // Custom Middlewares
 function isAuthenticated(req, res, next) {
@@ -52,7 +45,14 @@ app.post("/login", async (req, res) => {
         }
 
         if (await bcrypt.compare(password, hashedPassword)) {
-            res.status(200).send("Welcome, you are logged in successfully");
+            const token = jwt.sign(
+                {
+                    email,
+                    type,
+                },
+                process.env.JWT_SECRET
+            );
+            res.status(200).send(token);
         } else {
             res.status(403).send("Invalid Password");
         }
