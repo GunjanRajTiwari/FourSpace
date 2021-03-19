@@ -1,7 +1,7 @@
 CREATE TABLE users(
-    id SERIAL PRIMARY KEY,
+    id SERIAL,
     name VARCHAR(63) NOT NULL,
-    email VARCHAR(63) NOT NULL UNIQUE,
+    email VARCHAR(63) NOT NULL UNIQUE PRIMARY KEY,
     available BOOLEAN DEFAULT true,
     password VARCHAR(72) NOT NULL
 );

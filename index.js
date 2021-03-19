@@ -15,34 +15,46 @@ app.use(express.json());
 app.use(cors());
 
 // Custom Middlewares
-function isAuthenticated(req, res, next) {
-    return next();
+function authenticate(req, res, next) {
+    const token = req.body.token;
+    const authUser = jwt.verify(token, process.env.JWT_SECRET);
+    req.body.authUser = authUser;
+    next();
 }
 
+// Helper functions
 function errmsg(msg) {
     return { error: msg };
 }
 
+function table(type) {
+    if (type == "user") {
+        return "users";
+    }
+    if (type == "company") {
+        return "companies";
+    }
+    return;
+}
+
 // Routes
+// Login Users
 app.post("/login", async (req, res) => {
     try {
         const { email, password, type } = req.body;
-        var table;
-        if (type == "user") {
-            table = "users";
-        } else if (type == "company") {
-            table = "companies";
-        } else {
+        if (!table(type)) {
             res.status(400).send({ error: "Invalid type" });
         }
 
-        var query = `select password from ${table} where email = '${email}';`;
+        var query = `select password from ${table(
+            type
+        )} where email = '${email}';`;
         var result = await db.query(query);
-        var hashedPassword = result.rows[0].password;
 
-        if (!hashedPassword) {
-            res.status(400).send(errmsg("Invalid credentials"));
+        if (result.rowCount == 0) {
+            res.status(400).send(errmsg("User donot exist"));
         }
+        var hashedPassword = result.rows[0].password;
 
         if (await bcrypt.compare(password, hashedPassword)) {
             const token = jwt.sign(
@@ -70,22 +82,33 @@ app.post("/register", async (req, res) => {
             res.status(400).send(errmsg("Password too short"));
         }
 
-        var table;
-        if (type == "user") {
-            table = "users";
-        } else if (type == "company") {
-            table = "companies";
-        } else {
+        if (!table(type)) {
             res.status(400).send({ error: "Invalid type" });
         }
-
         var hashedPassword = await bcrypt.hash(password, 10);
 
-        var query = `insert into ${table} values(default, '${name}', '${email}', default, '${hashedPassword}');`;
+        var query = `insert into ${table(
+            type
+        )} values(default, '${name}', '${email}', default, '${hashedPassword}');`;
         var result = await db.query(query);
         res.status(200).send(result);
     } catch (err) {
-        res.status(500).json(errmsg(err.detail));
+        res.status(500).json(errmsg(err));
+    }
+});
+
+app.get("/profile", authenticate, async (req, res) => {
+    try {
+        var { email, type } = req.body.authUser;
+        if (!table(type)) {
+            res.status(400).send({ error: "Invalid type" });
+        }
+        var query = `select id, name, email, available from users where email = '${email}'`;
+        var result = await db.query(query);
+        var profile = result.rows[0];
+        res.status(200).send(profile);
+    } catch (err) {
+        res.status(500).json(errmsg(err));
     }
 });
 
