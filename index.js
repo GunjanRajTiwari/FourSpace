@@ -31,10 +31,9 @@ function errmsg(msg) {
 }
 
 // Routes
-app.get("/login", async (req, res) => {
+app.post("/login", async (req, res) => {
     try {
         const { email, password, type } = req.body;
-
         var table;
         if (type == "user") {
             table = "users";
@@ -44,11 +43,21 @@ app.get("/login", async (req, res) => {
             res.status(400).send({ error: "Invalid type" });
         }
 
-        var query = `select password from ${table} where email = ${email};`;
-        var hashedPassword = await db.query(query);
-        res.status(200).send(result);
+        var query = `select password from ${table} where email = '${email}';`;
+        var result = await db.query(query);
+        var hashedPassword = result.rows[0].password;
+
+        if (!hashedPassword) {
+            res.status(400).send(errmsg("Invalid credentials"));
+        }
+
+        if (await bcrypt.compare(password, hashedPassword)) {
+            res.status(200).send("Welcome, you are logged in successfully");
+        } else {
+            res.status(403).send("Invalid Password");
+        }
     } catch (err) {
-        res.status(500).json({ error: err.detail });
+        res.status(500).json(errmsg(err));
     }
 });
 
@@ -71,13 +80,12 @@ app.post("/register", async (req, res) => {
         }
 
         var hashedPassword = await bcrypt.hash(password, 10);
-        res.send(hashedPassword);
 
         var query = `insert into ${table} values(default, '${name}', '${email}', default, '${hashedPassword}');`;
         var result = await db.query(query);
         res.status(200).send(result);
     } catch (err) {
-        res.status(500).json({ error: err.detail });
+        res.status(500).json(errmsg(err.detail));
     }
 });
 
