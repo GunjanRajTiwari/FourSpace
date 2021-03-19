@@ -1,27 +1,40 @@
 // Modules import
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const db = require("./db");
+const { urlencoded } = require("express");
 
-// Middlewares
+// Express Middlewares
 const app = express();
-app.use(bodyParser());
+app.use(express.json());
+app.use(urlencoded({ extended: false }));
 app.use(cors());
 
 // Routes
-app.post("/signin", async (req, res) => {
+app.get("/", (req, res) => {
+    res.send("Goto /signin");
+});
+
+app.post("/register", async (req, res) => {
     try {
-        res.send(req);
-        var { name, email, password } = req.body;
-        var query = `insert into users values(default, '${name}', '${email}', default, '${password}');`;
-        res.send(query);
+        var { name, email, password, type } = req.body;
+        var table;
+        if (type == "user") {
+            table = "users";
+        } else if (type == "company") {
+            table = "companies";
+        } else {
+            res.status(400).send({ error: "Invalid type" });
+        }
+
+        var query = `insert into ${table} values(default, '${name}', '${email}', default, '${password}');`;
         var result = await db.query(query);
-        res.status(201).send(result);
-    } catch (e) {
-        res.status(500).send(e);
+        res.status(200).send(result);
+    } catch (err) {
+        res.status(500).send(err);
     }
 });
+
 app.get("/users", async (req, res) => {
     try {
         var { rowCount, rows } = await db.query(
@@ -33,9 +46,15 @@ app.get("/users", async (req, res) => {
     }
 });
 
-app.get("/greet", (req, res) => {
-    // db.query("select");
-    res.send("Hello Sandesh");
+app.get("/companies", async (req, res) => {
+    try {
+        var { rowCount, rows } = await db.query(
+            "select id, name, email, openings from companies"
+        );
+        res.status(200).send({ companyCount: rowCount, companies: rows });
+    } catch (e) {
+        res.status(500).send(e);
+    }
 });
 
 // Listening to the server
