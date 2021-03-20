@@ -89,9 +89,9 @@ app.post("/register", async (req, res) => {
 
         var query = `insert into ${table(
             type
-        )} values(default, '${name}', '${email}', default, '${hashedPassword}');`;
+        )} values('${name}', '${email}', default, default, '${hashedPassword}');`;
         var result = await db.query(query);
-        res.status(200).send(result);
+        res.status(200).send("ok");
     } catch (err) {
         res.status(500).json(errmsg(err));
     }
@@ -103,7 +103,7 @@ app.get("/profile", authenticate, async (req, res) => {
         if (!table(type)) {
             res.status(400).send({ error: "Invalid type" });
         }
-        var query = `select id, name, email, available from users where email = '${email}'`;
+        var query = `select name, email, available from users where email = '${email}'`;
         var result = await db.query(query);
         var profile = result.rows[0];
         res.status(200).send(profile);
@@ -116,7 +116,7 @@ app.get("/profile", authenticate, async (req, res) => {
 app.get("/", async (req, res) => {
     try {
         var { rowCount, rows } = await db.query(
-            "select id, name, email, available from users"
+            "select name, email, available from users"
         );
         res.status(200).send({ userCount: rowCount, users: rows });
     } catch (e) {
@@ -128,7 +128,7 @@ app.get("/", async (req, res) => {
 app.get("/companies", async (req, res) => {
     try {
         var { rowCount, rows } = await db.query(
-            "select id, name, email, openings from companies"
+            "select name, email, openings from companies"
         );
         res.status(200).send({ companyCount: rowCount, companies: rows });
     } catch (e) {
