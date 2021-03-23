@@ -46,9 +46,7 @@ app.post("/login", async (req, res) => {
             res.status(400).send({ error: "Invalid type" });
         }
 
-        var query = `select password from ${table(
-            type
-        )} where email = '${email}';`;
+        var query = `select password from ${table(type)} where email = '${email}';`;
         var result = await db.query(query);
 
         if (result.rowCount == 0) {
@@ -115,9 +113,7 @@ app.get("/profile", authenticate, async (req, res) => {
 // Get users
 app.get("/", async (req, res) => {
     try {
-        var { rowCount, rows } = await db.query(
-            "select name, email, available from users"
-        );
+        var { rowCount, rows } = await db.query("select name, email, available from users");
         res.status(200).send({ userCount: rowCount, users: rows });
     } catch (e) {
         res.status(500).send(e);
@@ -127,9 +123,7 @@ app.get("/", async (req, res) => {
 // Get companies
 app.get("/companies", async (req, res) => {
     try {
-        var { rowCount, rows } = await db.query(
-            "select name, email, openings from companies"
-        );
+        var { rowCount, rows } = await db.query("select name, email, openings from companies");
         res.status(200).send({ companyCount: rowCount, companies: rows });
     } catch (e) {
         res.status(500).send(e);
@@ -137,6 +131,6 @@ app.get("/companies", async (req, res) => {
 });
 
 // Listening to the server
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT || 8080, () => {
     console.log("Server running at 8080...");
 });
