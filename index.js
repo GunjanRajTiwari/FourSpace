@@ -15,12 +15,16 @@ app.use(express.json());
 app.use(cors());
 
 // Custom Middlewares
-function authenticate(req, res, next) {
-    const token = req.body.token;
-    const authUser = jwt.verify(token, process.env.JWT_SECRET);
-    req.body.authUser = authUser;
-    next();
-}
+const authenticate = (req, res, next) => {
+    try {
+        const token = req.body.token;
+        const authUser = jwt.verify(token, process.env.JWT_SECRET);
+        req.body.authUser = authUser;
+        next();
+    } catch (e) {
+        res.status(400).send(errmsg("Authentication failed!"));
+    }
+};
 
 // Helper functions
 function errmsg(msg) {
@@ -64,10 +68,10 @@ app.post("/login", async (req, res) => {
             );
             res.status(200).send(token);
         } else {
-            res.status(403).send("Invalid Password");
+            res.status(403).send(errmsg("Invalid Password"));
         }
     } catch (err) {
-        res.status(500).json(errmsg(err));
+        res.status(500).send(errmsg(err));
     }
 });
 
@@ -81,39 +85,69 @@ app.post("/register", async (req, res) => {
         }
 
         if (!table(type)) {
-            res.status(400).send({ error: "Invalid type" });
+            res.status(400).send(errmsg("Invalid type"));
         }
         var hashedPassword = await bcrypt.hash(password, 10);
 
-        var query = `insert into ${table(
-            type
-        )} values('${name}', '${email}', default, default, '${hashedPassword}');`;
-        var result = await db.query(query);
+        var query = `insert into ${table(type)} values(
+            '${name}', '${email}', default, ${type == "user" ? "default," : ""} '${hashedPassword}'
+            );`;
+        await db.query(query);
         res.status(200).send("ok");
     } catch (err) {
         res.status(500).json(errmsg(err));
     }
 });
 
+// View User Profile
 app.get("/profile", authenticate, async (req, res) => {
     try {
         var { email, type } = req.body.authUser;
         if (!table(type)) {
             res.status(400).send({ error: "Invalid type" });
         }
-        var query = `select name, email, available from users where email = '${email}'`;
+        var query = `select * from ${table(type)} where email = '${email}'`;
         var result = await db.query(query);
         var profile = result.rows[0];
+        delete profile.password;
         res.status(200).send(profile);
     } catch (err) {
-        res.status(500).json(errmsg(err));
+        res.status(500).send(errmsg(err));
+    }
+});
+
+// Create Contests
+app.post("/contests", authenticate, async (req, res) => {
+    try {
+        if (req.authUser != "company") {
+            res.status(403).send(errmsg("User don't have access to this task."));
+        }
+        var { name, info } = req.body;
+        var query = `insert into contests values(
+            default, '${name}', '${info}', default, '${req.authUser.email}'
+            )`;
+        await db.query(query);
+        res.status(200).send("ok");
+    } catch (err) {
+        res.status(500).send(errmsg("Contest creation failed!"));
+    }
+});
+
+// Get contests
+app.get("/contests", async (req, res) => {
+    try {
+        var query = "select * from contests";
+        var result = await db.query(query);
+        res.send({ contestCount: result.rowCount, contests: result.rows });
+    } catch (err) {
+        res.status(500).send(errmsg(err));
     }
 });
 
 // Get users
 app.get("/", async (req, res) => {
     try {
-        var { rowCount, rows } = await db.query("select name, email, available from users");
+        var { rowCount, rows } = await db.query("select name, email, available, rating from users");
         res.status(200).send({ userCount: rowCount, users: rows });
     } catch (e) {
         res.status(500).send(e);
@@ -131,6 +165,7 @@ app.get("/companies", async (req, res) => {
 });
 
 // Listening to the server
-app.listen(process.env.PORT || 8080, () => {
-    console.log("Server running at 8080...");
+var port = process.env.PORT || 8080;
+app.listen(port, () => {
+    console.log("Server running at " + port + "...");
 });

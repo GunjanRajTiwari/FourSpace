@@ -51,8 +51,9 @@
     {
         name,
         email,
-        available,
-        rating
+        available (Only for users),
+        openings (Only for companies),
+        rating (only for users)
     }
     ```
 
