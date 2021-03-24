@@ -119,7 +119,7 @@ app.get("/profile", authenticate, async (req, res) => {
 // Create Contests
 app.post("/contests", authenticate, async (req, res) => {
     try {
-        if (req.authUser != "company") {
+        if (req.authUser.type != "company") {
             res.status(403).send(errmsg("User don't have access to this task."));
         }
         var { name, info } = req.body;
