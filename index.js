@@ -119,17 +119,18 @@ app.get("/profile", authenticate, async (req, res) => {
 // Create Contests
 app.post("/contests", authenticate, async (req, res) => {
     try {
-        if (req.authUser.type != "company") {
+        if (req.body.authUser.type != "company") {
             res.status(403).send(errmsg("User don't have access to this task."));
         }
         var { name, info } = req.body;
         var query = `insert into contests values(
-            default, '${name}', '${info}', default, '${req.authUser.email}'
-            )`;
+            default, '${name}', '${info}', default, '${req.body.authUser.email}'
+            );`;
+
         await db.query(query);
         res.status(200).send("ok");
     } catch (err) {
-        res.status(500).send(errmsg("Contest creation failed!"));
+        res.status(500).send(errmsg(err));
     }
 });
 
