@@ -67,3 +67,26 @@
         companies[]
     }
     ```
+
+5. POST "./contests"
+
+    Body
+
+    ```
+    {
+        token,
+        name,
+        info
+    }
+    ```
+
+6. GET "./contests"
+
+    Response
+
+    ```
+    {
+        contestCount,
+        contests[]
+    }
+    ```
