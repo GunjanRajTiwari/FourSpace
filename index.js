@@ -66,7 +66,7 @@ app.post("/login", async (req, res) => {
                 },
                 process.env.JWT_SECRET
             );
-            res.status(200).send(token);
+            res.status(200).send({ token });
         } else {
             res.status(403).send(errmsg("Invalid Password"));
         }
@@ -136,8 +136,10 @@ app.post("/contests", authenticate, async (req, res) => {
 // Get contests
 app.get("/contests", async (req, res) => {
     try {
-        var query = "select * from contests";
+        var query = "select * from contests;";
+
         var result = await db.query(query);
+
         res.send({ contestCount: result.rowCount, contests: result.rows });
     } catch (err) {
         res.status(500).send(errmsg(err));
