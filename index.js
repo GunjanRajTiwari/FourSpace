@@ -100,7 +100,7 @@ app.post("/register", async (req, res) => {
 });
 
 // View User Profile
-app.get("/profile", authenticate, async (req, res) => {
+app.post("/profile", authenticate, async (req, res) => {
     try {
         var { email, type } = req.body.authUser;
         if (!table(type)) {
