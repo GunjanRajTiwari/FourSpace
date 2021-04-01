@@ -29,6 +29,8 @@ CREATE TABLE questions(
     contest_id INT,
     difficulty VARCHAR(8),
     points INT NOT NULL DEFAULT 100,
+    testcase VARCHAR(63),
+    output VARCHAR(63),
     CONSTRAINT contest FOREIGN KEY(contest_id) REFERENCES contests(id)
 );
 

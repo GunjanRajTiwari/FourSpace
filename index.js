@@ -6,6 +6,7 @@ const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
 
 const db = require("./db");
 
@@ -110,6 +111,7 @@ app.post("/profile", authenticate, async (req, res) => {
         var result = await db.query(query);
         var profile = result.rows[0];
         delete profile.password;
+        profile.type = type;
         res.status(200).send(profile);
     } catch (err) {
         res.status(500).send(errmsg(err));
@@ -144,6 +146,44 @@ app.get("/contests", async (req, res) => {
         res.send({ contestCount: result.rowCount, contests: result.rows });
     } catch (err) {
         res.status(500).send(errmsg(err));
+    }
+});
+
+// Check Submissions
+app.post("/submit", authenticate, async (req, res) => {
+    try {
+        var { question, code, language, token } = req.body;
+        var query = `select points, testcase, output from questions where id=${question};`;
+        var result = await db.query(query);
+        var { points, testcase, output } = result.rows[0];
+
+        var apiOutput = await axios({
+            method: "post",
+            url: "https://codexweb.netlify.app/.netlify/functions/enforceCode",
+            data: {
+                code,
+                language,
+                input: testcase,
+            },
+        });
+        if (apiOutput.data.output.indexOf("Execution Timed Out!") !== -1) {
+            res.send({
+                status: 0,
+                message: "Time Limit Exceeded!",
+            });
+        } else if (apiOutput.data.output.trim() == output) {
+            res.send({
+                status: 1,
+                message: "Success! Testcases Passed!",
+            });
+        } else {
+            res.send({
+                status: 0,
+                message: "Wrong Answer!",
+            });
+        }
+    } catch (e) {
+        res.status(500).send(errmsg(e));
     }
 });
 

@@ -35,7 +35,7 @@
     }
     ```
 
-3. GET "/profile"
+3. POST "/profile"
 
     Body
 
