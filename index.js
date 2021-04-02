@@ -150,9 +150,39 @@ app.get("/contests", async (req, res) => {
 });
 
 // Check Submissions
+app.post("/run", authenticate, async (req, res) => {
+    try {
+        var { code, language, input } = req.body;
+
+        var apiOutput = await axios({
+            method: "post",
+            url: "https://codexweb.netlify.app/.netlify/functions/enforceCode",
+            data: {
+                code,
+                language,
+                input,
+            },
+        });
+        if (apiOutput.data.output.indexOf("Execution Timed Out!") !== -1) {
+            res.send({
+                status: 0,
+                output: "Time Limit Exceeded!",
+            });
+        } else {
+            res.send({
+                status: 1,
+                output: apiOutput.data.output,
+            });
+        }
+    } catch (e) {
+        res.status(500).send(errmsg(e));
+    }
+});
+
+// Submit code
 app.post("/submit", authenticate, async (req, res) => {
     try {
-        var { question, code, language, token } = req.body;
+        var { question, code, language } = req.body;
         var query = `select points, testcase, output from questions where id=${question};`;
         var result = await db.query(query);
         var { points, testcase, output } = result.rows[0];
