@@ -43,7 +43,7 @@ const authenticate = (req, res, next) => {
             throw new Error();
         }
         req.body.authUser=result.rows[0];
-        res.authUser=result.rows[0];
+        res.send({authUser: result.rows[0]});
         next();
     } catch (e) {
         res.status(400).send(errmsg("Authentication failed!"));
