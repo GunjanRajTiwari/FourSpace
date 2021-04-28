@@ -15,18 +15,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Custom Middlewares
-const authenticate = (req, res, next) => {
-    try {
-        const token = req.body.token;
-        const authUser = jwt.verify(token, process.env.JWT_SECRET);
-        req.body.authUser = authUser;
-        next();
-    } catch (e) {
-        res.status(400).send(errmsg("Authentication failed!"));
-    }
-};
-
 // Helper functions
 function errmsg(msg) {
     return { error: msg };
@@ -41,6 +29,26 @@ function table(type) {
     }
     return;
 }
+
+// Custom Middlewares
+const authenticate = (req, res, next) => {
+    try {
+        const token = req.body.token;
+        const authUser = jwt.verify(token, process.env.JWT_SECRET);
+        var type = authUser.type;
+        var email = authUser.email;
+        var query = `select * from ${table(type)} where email='${email}'`
+        var result = await db.query(query);
+        if(result.rowCount == 0){
+            throw new Error();
+        }
+        req.body.authUser=result.rows[0];
+        res.authUser=result.rows[0];
+        next();
+    } catch (e) {
+        res.status(400).send(errmsg("Authentication failed!"));
+    }
+};
 
 // Routes
 // Login Users
@@ -137,7 +145,7 @@ app.post("/contests", authenticate, async (req, res) => {
 });
 
 // Get contests
-app.get("/contests", async (req, res) => {
+app.get("/contests", authenticate, async (req, res) => {
     try {
         var query = "select * from contests;";
 
