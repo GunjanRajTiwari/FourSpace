@@ -157,6 +157,23 @@ app.get("/contests", authenticate, async (req, res) => {
     }
 });
 
+// Get questions of a contest
+app.get("/questions", authenticate, async(req, res) => {
+    const { cid } = req.body;
+    try {
+        var query = `select * from questions where contest_id = ${cid}`;
+
+        var result = await db.query(query);
+
+        res.send({
+            questionCount: result.rowCount,
+            questions: result.rows,
+        });
+    }catch(err){
+        res.status(500).send(errmsg(err));
+    }
+});
+
 // Check Submissions
 app.post("/run", authenticate, async (req, res) => {
     try {
