@@ -169,7 +169,21 @@ app.get("/questions", authenticate, async(req, res) => {
             questionCount: result.rowCount,
             questions: result.rows,
         });
-    }catch(err){
+    } catch(err) {
+        res.status(500).send(errmsg(err));
+    }
+});
+
+// Get single question
+app.get("/question", authenticate, async(req, res) => {
+    const { qid } = req.body;
+    try {
+        var query = `select * from questions where id = ${qid}`;
+
+        var result = await db.query(query);
+
+        res.send({ question: rows[0] });
+    } catch(err) {
         res.status(500).send(errmsg(err));
     }
 });
