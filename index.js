@@ -31,19 +31,19 @@ function table(type) {
 }
 
 // Custom Middlewares
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
     try {
         const token = req.body.token;
         const authUser = jwt.verify(token, process.env.JWT_SECRET);
         var type = authUser.type;
         var email = authUser.email;
-        var query = `select * from ${table(type)} where email='${email}'`
+        var query = `select * from ${table(type)} where email='${email}'`;
         var result = await db.query(query);
-        if(result.rowCount == 0){
+        if (result.rowCount == 0) {
             throw new Error();
         }
-        req.body.authUser=result.rows[0];
-        res.send({authUser: result.rows[0]});
+        req.body.authUser = result.rows[0];
+        res.send({ authUser: result.rows[0] });
         next();
     } catch (e) {
         res.status(400).send(errmsg("Authentication failed!"));
@@ -157,25 +157,51 @@ app.get("/contests", authenticate, async (req, res) => {
     }
 });
 
+// Post a question
+app.post("/question", authenticate, async (req, res) => {
+    if (req.body.authUser.type != "company") {
+        res.status(403).send(errmsg("User don't have access to this task."));
+    }
+    const { title, statement, cid, difficulty, points, testcase, output } = req.body;
+    try {
+        if (!points) {
+            points = "default";
+        }
+        var query = `insert into questions values(
+            default, title, statement, cid, 
+            difficulty, points, testcase, output);`;
+
+        await db.query(query);
+        res.status(200).send("ok");
+    } catch (e) {
+        res.status(500).send(errmsg(err));
+    }
+});
+
 // Get questions of a contest
-app.get("/questions", authenticate, async(req, res) => {
+app.get("/questions", authenticate, async (req, res) => {
     const { cid } = req.body;
     try {
+        var query = `select * from contests where id=${cid};`;
+
+        var result = await db.query(query);
+        var contestInfo = result;
+
         var query = `select * from questions where contest_id = ${cid}`;
 
         var result = await db.query(query);
 
-        res.send({
-            questionCount: result.rowCount,
-            questions: result.rows,
-        });
-    } catch(err) {
+        contestInfo.questionCount = result.rowCount;
+        contestInfo.questions = result.rows;
+
+        res.send(contestInfo);
+    } catch (err) {
         res.status(500).send(errmsg(err));
     }
 });
 
 // Get single question
-app.get("/question", authenticate, async(req, res) => {
+app.get("/question", authenticate, async (req, res) => {
     const { qid } = req.body;
     try {
         var query = `select * from questions where id = ${qid}`;
@@ -183,7 +209,7 @@ app.get("/question", authenticate, async(req, res) => {
         var result = await db.query(query);
 
         res.send({ question: rows[0] });
-    } catch(err) {
+    } catch (err) {
         res.status(500).send(errmsg(err));
     }
 });
