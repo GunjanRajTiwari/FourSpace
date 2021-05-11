@@ -179,7 +179,7 @@ app.post("/question", authenticate, async (req, res) => {
 });
 
 // Get questions of a contest
-app.get("/questions", authenticate, async (req, res) => {
+app.post("/questions", authenticate, async (req, res) => {
     const { cid } = req.body;
     try {
         var query = `select * from contests where id=${cid};`;
