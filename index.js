@@ -145,7 +145,7 @@ app.post("/contests", authenticate, async (req, res) => {
 });
 
 // Get contests
-app.get("/contests", authenticate, async (req, res) => {
+app.get("/contests", async (req, res) => {
     try {
         var query = "select * from contests;";
 
@@ -201,7 +201,7 @@ app.post("/questions", authenticate, async (req, res) => {
 });
 
 // Get single question
-app.get("/question", authenticate, async (req, res) => {
+app.post("/question", authenticate, async (req, res) => {
     const { qid } = req.body;
     try {
         var query = `select * from questions where id = ${qid}`;
