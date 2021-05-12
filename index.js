@@ -151,7 +151,7 @@ app.get("/contests", async (req, res) => {
 
         var result = await db.query(query);
 
-        res.send({ contestCount: result.rowCount, contests: result.rows });
+        res.send({ authUser: req.authUser, contestCount: result.rowCount, contests: result.rows });
     } catch (err) {
         res.status(500).send(errmsg(err));
     }
