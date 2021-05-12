@@ -42,7 +42,7 @@ const authenticate = async (req, res, next) => {
         if (result.rowCount == 0) {
             throw new Error();
         }
-        req.body.authUser = result.rows[0];
+        req.body.authUser = { ...result.rows[0], type };
         // res.send({ authUser: result.rows[0] });
         next();
     } catch (e) {
@@ -113,7 +113,7 @@ app.post("/profile", authenticate, async (req, res) => {
     try {
         var { email, type } = req.body.authUser;
         if (!table(type)) {
-            res.status(400).send({ authUser: req.body.authUser, error: "Invalid type" });
+            res.status(400).send({ error: "Invalid type" });
         }
         var query = `select * from ${table(type)} where email = '${email}'`;
         var result = await db.query(query);
