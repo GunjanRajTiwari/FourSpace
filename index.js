@@ -129,12 +129,12 @@ app.get("/profile", authenticate, async (req, res) => {
 // Create Contests
 app.post("/contests", authenticate, async (req, res) => {
     try {
-        if (req.body.authUser.type != "company") {
+        if (req.authUser.type != "company") {
             res.status(403).send(errmsg("User don't have access to this task."));
         }
         var { name, info } = req.body;
         var query = `insert into contests values(
-            default, '${name}', '${info}', default, '${req.body.authUser.email}'
+            default, '${name}', '${info}', default, '${req.authUser.email}'
             );`;
 
         await db.query(query);
@@ -145,7 +145,7 @@ app.post("/contests", authenticate, async (req, res) => {
 });
 
 // Get contests
-app.get("/contests", async (req, res) => {
+app.get("/contests", authenticate, async (req, res) => {
     try {
         var query = "select * from contests;";
 
@@ -159,7 +159,7 @@ app.get("/contests", async (req, res) => {
 
 // Post a question
 app.post("/question", authenticate, async (req, res) => {
-    if (req.body.authUser.type != "company") {
+    if (req.authUser.type != "company") {
         res.status(403).send(errmsg("User don't have access to this task."));
     }
     const { title, statement, cid, difficulty, points, testcase, output } = req.body;
@@ -179,13 +179,13 @@ app.post("/question", authenticate, async (req, res) => {
 });
 
 // Get questions of a contest
-app.post("/questions", authenticate, async (req, res) => {
-    const { cid } = req.body;
+app.get("/contests/:cid", authenticate, async (req, res) => {
+    const cid = req.params.cid;
     try {
         var query = `select * from contests where id=${cid};`;
 
         var result = await db.query(query);
-        var contestInfo = result;
+        var contestInfo = result.rows[0];
 
         var query = `select * from questions where contest_id = ${cid}`;
 
@@ -201,14 +201,14 @@ app.post("/questions", authenticate, async (req, res) => {
 });
 
 // Get single question
-app.post("/question", authenticate, async (req, res) => {
+app.post("/question/:cid", authenticate, async (req, res) => {
     const { qid } = req.body;
     try {
         var query = `select * from questions where id = ${qid}`;
 
         var result = await db.query(query);
 
-        res.send({ question: rows[0] });
+        res.send({ question: result.rows[0] });
     } catch (err) {
         res.status(500).send(errmsg(err));
     }
