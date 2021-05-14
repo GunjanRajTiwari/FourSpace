@@ -33,7 +33,7 @@ function table(type) {
 // Custom Middlewares
 const authenticate = async (req, res, next) => {
     try {
-        const token = req.header.token;
+        const token = req.headers.token;
         const authUser = jwt.verify(token, process.env.JWT_SECRET);
         var type = authUser.type;
         var email = authUser.email;
@@ -42,7 +42,7 @@ const authenticate = async (req, res, next) => {
         if (result.rowCount == 0) {
             throw new Error();
         }
-        req.body.authUser = { ...result.rows[0], type };
+        req.authUser = { ...result.rows[0], type };
         // res.send({ authUser: result.rows[0] });
         next();
     } catch (e) {
@@ -111,7 +111,7 @@ app.post("/register", async (req, res) => {
 // View User Profile
 app.get("/profile", authenticate, async (req, res) => {
     try {
-        var { email, type } = req.body.authUser;
+        var { email, type } = req.authUser;
         if (!table(type)) {
             res.status(400).send({ error: "Invalid type" });
         }
