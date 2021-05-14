@@ -33,7 +33,7 @@ function table(type) {
 // Custom Middlewares
 const authenticate = async (req, res, next) => {
     try {
-        const token = req.body.token;
+        const token = req.header.token;
         const authUser = jwt.verify(token, process.env.JWT_SECRET);
         var type = authUser.type;
         var email = authUser.email;
@@ -109,7 +109,7 @@ app.post("/register", async (req, res) => {
 });
 
 // View User Profile
-app.post("/profile", authenticate, async (req, res) => {
+app.get("/profile", authenticate, async (req, res) => {
     try {
         var { email, type } = req.body.authUser;
         if (!table(type)) {
