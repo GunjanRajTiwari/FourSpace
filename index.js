@@ -126,6 +126,18 @@ app.get("/profile", authenticate, async (req, res) => {
     }
 });
 
+// View leaderboard
+app.get("/leaderboard", async (req, res) => {
+    try {
+        var { rowCount, rows } = await db.query(
+            "select name, email, rating from users order by rating desc limit 10"
+        );
+        res.status(200).send({ userCount: rowCount, users: rows });
+    } catch (e) {
+        res.status(500).send(e);
+    }
+});
+
 // Create Contests
 app.post("/contests", authenticate, async (req, res) => {
     try {
