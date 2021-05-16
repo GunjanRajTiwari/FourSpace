@@ -199,7 +199,7 @@ app.get("/contests/:cid", authenticate, async (req, res) => {
         var result = await db.query(query);
         var contestInfo = result.rows[0];
 
-        var query = `select * from questions where contest_id = ${cid}`;
+        var query = `select id, title from questions where contest_id = ${cid}`;
 
         var result = await db.query(query);
 
@@ -220,7 +220,7 @@ app.get("/question/:qid", authenticate, async (req, res) => {
 
         var result = await db.query(query);
 
-        res.send({ question: result.rows[0] });
+        res.send({ ...result.rows[0] });
     } catch (err) {
         res.status(500).send(errmsg(err));
     }
