@@ -216,7 +216,7 @@ app.get("/contests/:cid", authenticate, async (req, res) => {
 app.get("/question/:qid", authenticate, async (req, res) => {
     const { qid } = req.params;
     try {
-        var query = `select * from questions where id = ${qid}`;
+        var query = `select title, statement, contest_id, difficulty, points from questions where id = ${qid}`;
 
         var result = await db.query(query);
 
