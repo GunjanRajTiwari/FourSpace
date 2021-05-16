@@ -260,7 +260,7 @@ app.post("/run", authenticate, async (req, res) => {
 app.post("/submit", authenticate, async (req, res) => {
     try {
         var { question, code, language } = req.body;
-        var query = `select points, testcase, output from questions where id=${question};`;
+        var query = `select points, testcase, output, contest_id from questions where id=${question};`;
         var result = await db.query(query);
         var { points, testcase, output } = result.rows[0];
 
