@@ -213,8 +213,8 @@ app.get("/contests/:cid", authenticate, async (req, res) => {
 });
 
 // Get single question
-app.post("/question/:cid", authenticate, async (req, res) => {
-    const { qid } = req.body;
+app.get("/question/:qid", authenticate, async (req, res) => {
+    const { qid } = req.params;
     try {
         var query = `select * from questions where id = ${qid}`;
 
