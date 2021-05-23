@@ -63,7 +63,7 @@ app.post("/login", async (req, res) => {
         var result = await db.query(query);
 
         if (result.rowCount == 0) {
-            res.status(400).send(errmsg("User donot exist"));
+            return res.status(400).send(errmsg("User donot exist"));
         }
         var hashedPassword = result.rows[0].password;
 
@@ -131,6 +131,24 @@ app.get("/leaderboard", async (req, res) => {
     try {
         var { rowCount, rows } = await db.query(
             "select name, email, rating from users order by rating desc limit 10"
+        );
+        res.status(200).send({ userCount: rowCount, users: rows });
+    } catch (e) {
+        res.status(500).send(e);
+    }
+});
+
+// Contest Leaderboard
+app.get("/leaderboard/:cid", async (req, res) => {
+    try {
+        const cid = req.params.cid;
+        var { rowCount, rows } = await db.query(
+            `SELECT name, email, score FROM
+            users INNER JOIN participation 
+            ON participation.user_email = users.email
+            WHERE contest_id = ${cid}
+            ORDER BY score desc
+            limit 10;`
         );
         res.status(200).send({ userCount: rowCount, users: rows });
     } catch (e) {
