@@ -17,7 +17,7 @@ app.use(cors());
 
 // Helper functions
 function errmsg(msg) {
-    return { error: msg };
+    return { error: msg || "Something went wrong!" };
 }
 
 function table(type) {
@@ -285,7 +285,11 @@ app.post("/submit", authenticate, async (req, res) => {
         var { question, code, language } = req.body;
         var query = `select points, testcase, output, contest_id from questions where id=${question};`;
         var result = await db.query(query);
-        var { points, testcase, output } = result.rows[0];
+        var { points, testcase, output, contest_id } = result.rows[0];
+        var { email, type } = req.authUser;
+        if (type == "company") {
+            res.status(400).send(errmsg("Companies cannot submit the solution."));
+        }
 
         var apiOutput = await axios({
             method: "post",
@@ -302,10 +306,22 @@ app.post("/submit", authenticate, async (req, res) => {
                 message: "Time Limit Exceeded!",
             });
         } else if (apiOutput.data.output.trim() == output) {
-            // var solved = db.query(`select * from solved where question_id = ${question} and user_email = `)
-            // var query = `INSERT INTO participation VALUES (50, 6, 'im.gunjan1@gmail.com','')
-            // ON CONFLICT (contest_id, user_email) DO UPDATE
-            //   SET score = participation.score+50;`;
+            var solved = await db.query(
+                `select * from solved where user_email = '${email}' and question_id = ${question};`
+            );
+
+            if (solved.rowCount == 0) {
+                var ratingIncrement = Math.floor(points / 10);
+                var query = `
+                INSERT INTO participation VALUES (${points}, ${contest_id}, '${email}')
+                ON CONFLICT (contest_id, user_email) DO UPDATE
+                SET score = participation.score+${points};
+                update users set rating=rating+${ratingIncrement} where email='${email}';
+                insert into solved values('${email}', ${question});
+                `;
+                await db.query(query);
+            }
+
             res.send({
                 status: 1,
                 message: "Success! Testcases Passed!",
