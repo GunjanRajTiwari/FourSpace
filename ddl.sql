@@ -43,16 +43,13 @@ CREATE TABLE participation(
     CONSTRAINT coder FOREIGN KEY(user_email) REFERENCES users(email)
 );
 
-
-insert into questions values(
-default, 
-'Pair Sum', 
-'You will be given two numbers and you have to find their sum. Input will contain two numbers separated with a space.',
-6,
-'easy',
-20,
-'1999 111111',
-'113110');
+CREATE TABLE solved(
+    user_email VARCHAR(63),
+    question_id INT,
+    PRIMARY KEY(user_email, question_id),
+    CONSTRAINT question FOREIGN KEY(question_id) REFERENCES questions(id),
+    CONSTRAINT coder FOREIGN KEY(user_email) REFERENCES users(email)
+);
 
 update users set rating=rating+100 where email='im.gunjan1@gmail.com';
 

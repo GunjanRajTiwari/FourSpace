@@ -109,13 +109,18 @@ app.post("/register", async (req, res) => {
 });
 
 // View User Profile
-app.get("/profile", authenticate, async (req, res) => {
+app.get("/profile/:email?", authenticate, async (req, res) => {
     try {
         var { email, type } = req.authUser;
+        var fetchEmail = req.params.email;
+        if (!fetchEmail) {
+            fetchEmail = email;
+        }
+
         if (!table(type)) {
             res.status(400).send({ error: "Invalid type" });
         }
-        var query = `select * from ${table(type)} where email = '${email}'`;
+        var query = `select * from ${table(type)} where email = '${fetchEmail}'`;
         var result = await db.query(query);
         var profile = result.rows[0];
         delete profile.password;
@@ -297,6 +302,10 @@ app.post("/submit", authenticate, async (req, res) => {
                 message: "Time Limit Exceeded!",
             });
         } else if (apiOutput.data.output.trim() == output) {
+            // var solved = db.query(`select * from solved where question_id = ${question} and user_email = `)
+            // var query = `INSERT INTO participation VALUES (50, 6, 'im.gunjan1@gmail.com','')
+            // ON CONFLICT (contest_id, user_email) DO UPDATE
+            //   SET score = participation.score+50;`;
             res.send({
                 status: 1,
                 message: "Success! Testcases Passed!",
