@@ -198,8 +198,10 @@ app.post("/question", authenticate, async (req, res) => {
     if (req.authUser.type != "company") {
         res.status(403).send(errmsg("User don't have access to this task."));
     }
-    const { title, statement, cid, difficulty, points, testcase, output } = req.body;
+
     try {
+        const { title, statement, cid, difficulty, points, testcase, output } = req.body;
+
         if (!points) {
             points = "default";
         }
@@ -209,7 +211,7 @@ app.post("/question", authenticate, async (req, res) => {
 
         await db.query(query);
         res.status(200).send("ok");
-    } catch (e) {
+    } catch (err) {
         res.status(500).send(errmsg(err));
     }
 });
