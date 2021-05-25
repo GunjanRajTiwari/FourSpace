@@ -19,7 +19,7 @@ CREATE TABLE contests(
     info TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     company_email VARCHAR(63),
-    CONSTRAINT company FOREIGN KEY(company_email) REFERENCES companies(email)
+    CONSTRAINT company FOREIGN KEY(company_email) REFERENCES companies(email) ON DELETE CASCADE
 );
 
 CREATE TABLE questions(
@@ -31,7 +31,7 @@ CREATE TABLE questions(
     points INT NOT NULL DEFAULT 100,
     testcase VARCHAR(63),
     output VARCHAR(63),
-    CONSTRAINT contest FOREIGN KEY(contest_id) REFERENCES contests(id)
+    CONSTRAINT contest FOREIGN KEY(contest_id) REFERENCES contests(id) ON DELETE CASCADE
 );
 
 CREATE TABLE participation(
@@ -39,16 +39,16 @@ CREATE TABLE participation(
     contest_id INT,
     user_email VARCHAR(63),
     PRIMARY KEY(contest_id,user_email),
-    CONSTRAINT contest FOREIGN KEY(contest_id) REFERENCES contests(id),
-    CONSTRAINT coder FOREIGN KEY(user_email) REFERENCES users(email)
+    CONSTRAINT contest FOREIGN KEY(contest_id) REFERENCES contests(id) ON DELETE CASCADE,
+    CONSTRAINT coder FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
 );
 
 CREATE TABLE solved(
     user_email VARCHAR(63),
     question_id INT,
     PRIMARY KEY(user_email, question_id),
-    CONSTRAINT question FOREIGN KEY(question_id) REFERENCES questions(id),
-    CONSTRAINT coder FOREIGN KEY(user_email) REFERENCES users(email)
+    CONSTRAINT question FOREIGN KEY(question_id) REFERENCES questions(id) ON DELETE CASCADE,
+    CONSTRAINT coder FOREIGN KEY(user_email) REFERENCES users(email) ON DELETE CASCADE
 );
 
 update users set rating=rating+100 where email='im.gunjan1@gmail.com';

@@ -113,14 +113,15 @@ app.get("/profile/:email?", authenticate, async (req, res) => {
     try {
         var { email, type } = req.authUser;
         var fetchEmail = req.params.email;
-        if (!fetchEmail) {
-            fetchEmail = email;
+        if (fetchEmail) {
+            email = fetchEmail;
+            type = "user";
         }
 
         if (!table(type)) {
             res.status(400).send({ error: "Invalid type" });
         }
-        var query = `select * from ${table(type)} where email = '${fetchEmail}'`;
+        var query = `select * from ${table(type)} where email = '${email}'`;
         var result = await db.query(query);
         var profile = result.rows[0];
         delete profile.password;
