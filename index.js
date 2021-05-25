@@ -206,8 +206,8 @@ app.post("/question", authenticate, async (req, res) => {
             points = "default";
         }
         var query = `insert into questions values(
-            default, ${title}, ${statement}, ${cid}, 
-            ${difficulty}, ${points}, ${testcase}, ${output});`;
+            default, '${title}', '${statement}', ${cid}, 
+            '${difficulty}', ${points}, '${testcase}', '${output}');`;
 
         await db.query(query);
         res.status(200).send("ok");
