@@ -1,0 +1,26 @@
+You will be given a string and you have to reverse all the characters of the string.
+
+Input format:
+A string S
+example: "hello"
+
+Output format:
+reverse of S
+example: "olleh"
+
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    string s, ans;
+    cin >> s;
+    
+    for(auto i: s){
+     	ans = i +ans;   
+    }
+    
+    cout << ans;
+    
+ 	return 0;   
+}

@@ -21,6 +21,7 @@
 -   The top-performing contestants will be given the priority for the job.
 -   The users will have stars and ratings according to their performances.
 -   The status of the users will be shown whether they are available for hiring or not.
+-    Interactive IDE with syntax highlighting and code compilation.
 
 ---
 
