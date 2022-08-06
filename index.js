@@ -259,7 +259,7 @@ app.post("/run", authenticate, async (req, res) => {
 
         var apiOutput = await axios({
             method: "post",
-            url: "https://codexweb.netlify.app/.netlify/functions/enforceCode",
+            url: "https://codex-api.herokuapp.com/",
             data: {
                 code,
                 language,
@@ -296,7 +296,7 @@ app.post("/submit", authenticate, async (req, res) => {
 
         var apiOutput = await axios({
             method: "post",
-            url: "https://codexweb.netlify.app/.netlify/functions/enforceCode",
+            url: "https://codex-api.herokuapp.com/",
             data: {
                 code,
                 language,
